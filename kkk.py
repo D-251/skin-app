@@ -6,8 +6,12 @@ st.set_page_config(page_title="تشخيص البشرة", layout="centered")
 st.title("🧴 مساعد تشخيص مشاكل البشرة")
 
 # إعداد مفتاح API من secrets
-openai.api_key = st.secrets["api_key"]
-openai.api_base = "https://openrouter.ai/api/v1"
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=st.secrets["api_key"],
+    base_url="https://openrouter.ai/api/v1"
+)
 
 # مدخلات المستخدم
 gender = st.selectbox("👤 أنت:", ["أنثى", "ذكر"])
@@ -26,16 +30,15 @@ if st.button("🔍 شخّص الحالة"):
         3- اسم منتج غالي أو عالمي معروف + السعر + صورة.
         4- لو المنتجات غير متوفرة، قدّم بدائل حقيقية بالأسماء التجارية.
         """
-
-        response = openai.ChatCompletion.create(
-            model="openai/gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "أنت طبيب أمراض جلدية محترف. قدم اقتراحات واضحة بناءً على السوق المصري."},
-                {"role": "user", "content": message}
-            ],
-            temperature=0.2
-        )
-
+  response = client.chat.completions.create(
+      model="openai/gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "أنت طبيب بشرة محترف تساعد المستخدم على تشخيص بشرته."},
+        {"role": "user", "content": f"النوع: {gender}\nالعمر: {age}\nالأعراض: {symptoms}"}
+    ],
+     temperature=0.2
+)
+        
         response_text = response.choices[0].message["content"]
         st.markdown("### 🧴 التشخيص والاقتراح:")
         st.markdown(response_text)
