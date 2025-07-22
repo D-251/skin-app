@@ -1,13 +1,11 @@
-import openai
 import streamlit as st
+from openai import OpenAI
 
 # إعداد الواجهة
 st.set_page_config(page_title="تشخيص البشرة", layout="centered")
 st.title("🧴 مساعد تشخيص مشاكل البشرة")
 
-# إعداد مفتاح API من secrets
-from openai import OpenAI
-
+# إعداد عميل OpenAI
 client = OpenAI(
     api_key=st.secrets["api_key"],
     base_url="https://openrouter.ai/api/v1"
@@ -18,6 +16,7 @@ gender = st.selectbox("👤 أنت:", ["أنثى", "ذكر"])
 age = st.text_input("🎂 عمرك:")
 symptoms = st.text_area("💬 اكتبي الأعراض اللي حاسة بيها في بشرتك:")
 
+# الزر الأول
 if st.button("🔍 شخّص الحالة"):
     with st.spinner("⏳ جاري تحليل الحالة..."):
         message = f"""
@@ -30,20 +29,21 @@ if st.button("🔍 شخّص الحالة"):
         3- اسم منتج غالي أو عالمي معروف + السعر + صورة.
         4- لو المنتجات غير متوفرة، قدّم بدائل حقيقية بالأسماء التجارية.
         """
-  response = client.chat.completions.create(
-      model="openai/gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": "أنت طبيب بشرة محترف تساعد المستخدم على تشخيص بشرته."},
-        {"role": "user", "content": f"النوع: {gender}\nالعمر: {age}\nالأعراض: {symptoms}"}
-    ],
-     temperature=0.2
-)
-        
-        response_text = response.choices[0].message["content"]
+
+        response = client.chat.completions.create(
+            model="openai/gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "أنت طبيب بشرة محترف تساعد المستخدم على تشخيص بشرته."},
+                {"role": "user", "content": message}
+            ],
+            temperature=0.2
+        )
+
+        response_text = response.choices[0].message.content
         st.markdown("### 🧴 التشخيص والاقتراح:")
         st.markdown(response_text)
 
-        # عرض صور المنتجات
+        # صور المنتجات
         product_images = {
             "بان أوكسيل": "https://i.imgur.com/LsGx4uc.jpg",
             "بنزاك": "https://i.imgur.com/VYx0clM.jpg",
@@ -58,25 +58,29 @@ if st.button("🔍 شخّص الحالة"):
             if name.lower() in response_text.lower():
                 st.image(url, caption=name, width=150)
 
-# المتابعة
+# متابعة الحالة
 st.markdown("---")
 st.markdown("### 🔁 هل استخدمت العلاج؟")
 follow_up = st.text_area("📋 اكتب إذا حصل تحسن أو ظهرت أعراض جديدة:")
 
+# زر المتابعة
 if st.button("📤 أرسل للمتابعة"):
     with st.spinner("⏳ جاري تعديل خطة العلاج بناءً على المتابعة..."):
         followup_msg = f"""
-مريض استخدم العلاج، وكتب التالي:
-"{follow_up}"
+        مريض استخدم العلاج، وكتب التالي:
+        "{follow_up}"
 
-⏳ عدّل خطة العلاج بناءً على ذلك.
-"""
-        response2 = openai.ChatCompletion.create(
+        ⏳ عدّل خطة العلاج بناءً على ذلك.
+        """
+
+        response2 = client.chat.completions.create(
             model="openai/gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "أنت طبيب تتابع الحالة بناءً على التطور."},
                 {"role": "user", "content": followup_msg}
-            ]
+            ],
+            temperature=0.3
         )
+
         st.markdown("### 🔁 خطة العلاج بعد المتابعة:")
-        st.markdown(response2.choices[0].message["content"])
+        st.markdown(response2.choices[0].message.content)
