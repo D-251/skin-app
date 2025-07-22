@@ -6,10 +6,8 @@ st.set_page_config(page_title="تشخيص البشرة", layout="centered")
 st.title("🧴 مساعد تشخيص مشاكل البشرة")
 
 # إعداد عميل OpenAI
-client = OpenAI(
-    api_key=st.secrets["api_key"],
-    base_url="https://openrouter.ai/api/v1"
-)
+openai.api_key = st.secrets["api_key"]
+openai.base_url = "https://openrouter.ai/api/v1"
 
 # مدخلات المستخدم
 gender = st.selectbox("👤 أنت:", ["أنثى", "ذكر"])
