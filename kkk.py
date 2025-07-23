@@ -1,5 +1,5 @@
+import openai
 import streamlit as st
-from openai import OpenAI
 
 # إعداد الواجهة
 st.set_page_config(page_title="تشخيص البشرة", layout="centered")
