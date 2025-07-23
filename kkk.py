@@ -28,7 +28,7 @@ if st.button("🔍 شخّص الحالة"):
         4- لو المنتجات غير متوفرة، قدّم بدائل حقيقية بالأسماء التجارية.
         """
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="openai/gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "أنت طبيب بشرة محترف تساعد المستخدم على تشخيص بشرته."},
@@ -71,7 +71,7 @@ if st.button("📤 أرسل للمتابعة"):
         ⏳ عدّل خطة العلاج بناءً على ذلك.
         """
 
-        response2 = client.chat.completions.create(
+        response2 = openai.ChatCompletion.create(
             model="openai/gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "أنت طبيب تتابع الحالة بناءً على التطور."},
